@@ -1,0 +1,612 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plano visual — gustavoh.dev</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Host+Grotesk:wght@300..800&display=swap" rel="stylesheet">
+<style>
+@font-face {
+  font-family: "Departure Mono";
+  src: url("https://cdn.jsdelivr.net/gh/rektdeckard/departure-mono@main/public/assets/DepartureMono-Regular.woff2") format("woff2");
+  font-display: swap;
+}
+:root {
+  --void: #0D0B14;
+  --carbon: #17141F;
+  --wire: #2C2838;
+  --bone: #ECE8DF;
+  --dim: #8F8A9C;
+  --sodium: #FFC233;
+  --uv: #8B5CFF;
+  --hp: #FF4D5E;
+
+  --f-display: "Archivo", system-ui, sans-serif;
+  --f-body: "Host Grotesk", system-ui, sans-serif;
+  --f-hud: "Departure Mono", ui-monospace, monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { background: var(--void); }
+body {
+  background: var(--void);
+  color: var(--bone);
+  font-family: var(--f-body);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+/* scanlines bem sutis, só como textura */
+body::before {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 50;
+  background: repeating-linear-gradient(to bottom, rgba(255,255,255,.018) 0 1px, transparent 1px 3px);
+}
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+@media (max-width: 600px) { .wrap { padding: 0 16px; } }
+
+.hud { font-family: var(--f-hud); font-size: 13px; letter-spacing: .02em; text-transform: uppercase; color: var(--dim); }
+.hud b { color: var(--sodium); font-weight: 400; }
+
+/* --- topo --- */
+.top {
+  position: sticky; top: 0; z-index: 40;
+  background: color-mix(in srgb, var(--void) 88%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--wire);
+}
+.top .wrap { display: flex; align-items: center; gap: 20px; height: 52px; }
+.xp { flex: 1; height: 8px; background: var(--carbon); border: 1px solid var(--wire); position: relative; }
+.top .hud { white-space: nowrap; }
+@media (max-width: 600px) { .top .hud:first-child { display: none; } }
+.xp i { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--sodium); }
+.xp i::after { content: ""; position: absolute; right: -1px; top: -3px; bottom: -3px; width: 2px; background: var(--bone); }
+
+/* --- capa --- */
+.cover { padding: 96px 0 72px; border-bottom: 1px solid var(--wire); }
+.cover h1 {
+  font-family: var(--f-display);
+  font-variation-settings: "wdth" 125;
+  font-weight: 850;
+  font-size: clamp(40px, 7.4vw, 92px);
+  line-height: .92;
+  letter-spacing: -.025em;
+  margin: 18px 0 28px;
+  max-width: 13ch;
+}
+.cover h1 em { font-style: normal; color: var(--sodium); }
+.cover p.lede { max-width: 58ch; font-size: 18px; color: #CFCAD8; }
+.brief { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--wire); border: 1px solid var(--wire); margin-top: 48px; }
+.brief div { background: var(--void); padding: 18px 20px; }
+.brief .hud { display: block; margin-bottom: 6px; }
+@media (max-width: 760px) { .brief { grid-template-columns: 1fr; } }
+
+/* --- seções do documento --- */
+section.doc { padding: 80px 0; border-bottom: 1px solid var(--wire); }
+.sh { display: flex; align-items: baseline; gap: 16px; margin-bottom: 36px; flex-wrap: wrap; }
+.sh h2 {
+  font-family: var(--f-display);
+  font-variation-settings: "wdth" 112;
+  font-weight: 750; font-size: clamp(28px, 4vw, 44px); line-height: 1; letter-spacing: -.02em;
+}
+.sh p { color: var(--dim); max-width: 52ch; }
+
+/* paleta */
+.swatches { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.sw { border: 1px solid var(--wire); background: var(--carbon); }
+.sw .chip { height: 120px; position: relative; }
+.sw .meta { padding: 14px 16px 16px; }
+.sw .meta strong { display: block; font-family: var(--f-display); font-variation-settings: "wdth" 110; font-weight: 700; font-size: 18px; }
+.sw .meta .hud { display: block; margin: 2px 0 8px; }
+.sw .meta p { font-size: 14px; color: #BDB8C8; }
+.sw.wide { grid-column: span 2; }
+@media (max-width: 860px) { .swatches { grid-template-columns: repeat(2, 1fr); } .sw.wide { grid-column: span 2; } }
+.ratio { display: flex; height: 28px; margin-top: 24px; border: 1px solid var(--wire); }
+.ratio span { display: grid; place-items: center; font-family: var(--f-hud); font-size: 11px; color: var(--void); }
+.ratio-legend { margin-top: 8px; }
+
+/* tipografia */
+.types { display: grid; gap: 12px; }
+.ty { display: grid; grid-template-columns: 240px 1fr; border: 1px solid var(--wire); background: var(--carbon); }
+.ty .lab { padding: 20px; border-right: 1px solid var(--wire); }
+.ty .lab strong { display: block; font-size: 17px; margin-bottom: 4px; }
+.ty .lab p { font-size: 14px; color: #BDB8C8; margin-top: 10px; }
+.ty .spec { padding: 28px 28px 30px; overflow: hidden; }
+.spec-display { font-family: var(--f-display); font-variation-settings: "wdth" 125; font-weight: 850; font-size: clamp(36px, 6vw, 72px); line-height: .95; letter-spacing: -.025em; }
+.spec-body { font-family: var(--f-body); font-size: 20px; line-height: 1.5; max-width: 46ch; }
+.spec-hud { font-family: var(--f-hud); font-size: 22px; color: var(--sodium); line-height: 1.5; }
+@media (max-width: 760px) { .ty { grid-template-columns: 1fr; } .ty .lab { border-right: 0; border-bottom: 1px solid var(--wire); } }
+.scale { margin-top: 20px; border: 1px solid var(--wire); }
+.scale div { display: grid; grid-template-columns: 110px 140px 1fr; align-items: baseline; gap: 16px; padding: 10px 18px; border-bottom: 1px solid var(--wire); }
+.scale div:last-child { border-bottom: 0; }
+@media (max-width: 600px) { .scale div { grid-template-columns: 80px 1fr; } .scale div > :last-child { grid-column: 1 / -1; } }
+
+/* mascote */
+.signature { display: grid; grid-template-columns: 1.1fr 1fr; gap: 24px; align-items: stretch; }
+@media (max-width: 860px) { .signature { grid-template-columns: 1fr; } }
+.stage {
+  border: 1px solid var(--wire); background:
+    radial-gradient(60% 50% at 50% 70%, rgba(139,92,255,.22), transparent 70%),
+    var(--carbon);
+  min-height: 360px; display: grid; grid-template-rows: 1fr auto; position: relative; overflow: hidden;
+}
+.stage .floor { position: absolute; left: 0; right: 0; bottom: 64px; height: 1px; background: var(--wire); }
+.stage .main { display: grid; place-items: end center; padding: 120px 0 64px; }
+.bob { animation: bob 1.6s steps(2) infinite; }
+@keyframes bob { 50% { transform: translateY(-6px); } }
+.dialog {
+  position: absolute; left: 50%; top: 26px; transform: translateX(-50%);
+  width: min(86%, 380px);
+  border: 2px solid var(--bone); background: var(--void);
+  padding: 12px 14px; font-family: var(--f-hud); font-size: 14px; line-height: 1.45; color: var(--bone);
+}
+.dialog::after { content: "▼"; position: absolute; right: 10px; bottom: 4px; font-size: 10px; color: var(--sodium); animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.frames { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--wire); }
+.frames div { padding: 12px 8px 10px; display: grid; justify-items: center; gap: 6px; border-right: 1px solid var(--wire); }
+.frames div:last-child { border-right: 0; }
+.notes { border: 1px solid var(--wire); padding: 24px; display: grid; gap: 18px; align-content: start; }
+.notes h3 { font-family: var(--f-display); font-variation-settings: "wdth" 110; font-weight: 700; font-size: 22px; }
+.notes ul { list-style: none; display: grid; gap: 10px; }
+.notes li { padding-left: 18px; position: relative; color: #CFCAD8; }
+.notes li::before { content: "■"; position: absolute; left: 0; top: 1px; font-size: 9px; color: var(--sodium); }
+
+.hudbar {
+  margin-top: 24px; border: 1px solid var(--wire); background: var(--void);
+  display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: 18px; padding: 12px 16px;
+}
+.hudbar .logo { font-family: var(--f-display); font-variation-settings: "wdth" 125; font-weight: 900; font-size: 18px; letter-spacing: -.02em; }
+@media (max-width: 600px) { .hudbar { grid-template-columns: auto 1fr; } .hudbar .hide-sm { display: none; } }
+
+/* storyboard */
+.levels { display: grid; gap: 40px; }
+.lvl { display: grid; grid-template-columns: 1.15fr 1fr; gap: 28px; align-items: start; }
+@media (max-width: 860px) { .lvl { grid-template-columns: 1fr; } }
+.lvl h3 { font-family: var(--f-display); font-variation-settings: "wdth" 115; font-weight: 750; font-size: 26px; line-height: 1.05; margin: 6px 0 12px; letter-spacing: -.015em; }
+.lvl .copy { font-family: var(--f-display); font-variation-settings: "wdth" 120; font-weight: 800; color: var(--sodium); font-size: 18px; margin-bottom: 12px; line-height: 1.15; }
+.lvl dl { display: grid; grid-template-columns: 96px 1fr; gap: 8px 14px; margin-top: 16px; font-size: 14px; }
+.lvl dt { font-family: var(--f-hud); text-transform: uppercase; font-size: 12px; color: var(--dim); padding-top: 2px; }
+.lvl dd { color: #CFCAD8; }
+
+/* wireframes */
+.wf {
+  aspect-ratio: 16 / 10; border: 1px solid var(--wire); background: var(--carbon);
+  position: relative; overflow: hidden; font-family: var(--f-hud); font-size: 10px; color: var(--dim); text-transform: uppercase;
+}
+.wf .bar { position: absolute; left: 0; right: 0; top: 0; height: 7%; border-bottom: 1px dashed var(--wire); display: flex; align-items: center; gap: 8px; padding: 0 3%; }
+.wf .bar .x { flex: 1; height: 3px; background: var(--wire); position: relative; }
+.wf .bar .x::before { content: ""; position: absolute; inset: 0 auto 0 0; width: var(--p, 10%); background: var(--sodium); }
+.box { position: absolute; border: 1px dashed #4A4458; display: grid; place-items: center; text-align: center; padding: 2px; }
+.line { position: absolute; height: 6%; background: #3A3547; }
+.line.y { background: var(--sodium); }
+.line.thin { height: 2.4%; background: #332F40; }
+.wf .sprite { position: absolute; }
+.wf.yellow { background: var(--sodium); color: #4A3A00; }
+.wf.yellow .box { border-color: rgba(13,11,20,.45); }
+.wf.yellow .line { background: rgba(13,11,20,.75); }
+.wf.yellow .line.thin { background: rgba(13,11,20,.35); }
+.wf.yellow .bar { border-color: rgba(13,11,20,.3); }
+.wf.yellow .bar .x { background: rgba(13,11,20,.25); }
+.wf.yellow .bar .x::before { background: var(--void); }
+.tag { position: absolute; font-size: 9px; padding: 2px 5px; background: var(--void); color: var(--sodium); border: 1px solid var(--wire); }
+
+/* stack */
+.stack { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--wire); border: 1px solid var(--wire); }
+.stack div { background: var(--void); padding: 20px; }
+.stack strong { display: block; font-size: 17px; margin: 4px 0 6px; }
+.stack p { font-size: 14px; color: #BDB8C8; }
+@media (max-width: 860px) { .stack { grid-template-columns: 1fr; } }
+code { font-family: var(--f-hud); font-size: 13px; color: var(--sodium); background: var(--carbon); padding: 1px 5px; border: 1px solid var(--wire); }
+pre { font-family: var(--f-hud); font-size: 13px; line-height: 1.6; color: #CFCAD8; background: var(--carbon); border: 1px solid var(--wire); padding: 18px 20px; margin-top: 16px; overflow-x: auto; }
+
+/* revisão e perguntas */
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 860px) { .two { grid-template-columns: 1fr; } }
+.rev { border: 1px solid var(--wire); padding: 20px 22px; }
+.rev .hud { display: block; margin-bottom: 8px; }
+.rev s { color: var(--dim); }
+.qs { counter-reset: q; list-style: none; display: grid; gap: 1px; background: var(--wire); border: 1px solid var(--wire); }
+.qs li { background: var(--void); padding: 18px 20px 18px 64px; position: relative; }
+.qs li::before { counter-increment: q; content: "Q" counter(q); position: absolute; left: 20px; top: 18px; font-family: var(--f-hud); color: var(--sodium); }
+.qs strong { display: block; margin-bottom: 2px; }
+.qs span { color: #BDB8C8; font-size: 15px; }
+
+footer { padding: 48px 0 80px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .bob, .dialog::after { animation: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="wrap">
+    <span class="hud"><b>■</b> plano visual · v0.1</span>
+    <div class="xp" aria-hidden="true"><i id="xp"></i></div>
+    <span class="hud" id="lvlname">LV.0 · capa</span>
+  </div>
+</div>
+
+<header class="cover">
+  <div class="wrap">
+    <span class="hud">gustavoh.dev — portfólio vibe coder · direção de arte</span>
+    <h1>Um designer que <em>dá play</em> no que desenha.</h1>
+    <p class="lede">O site é uma “run” de jogo contada pelo scroll. Um mascote em pixel art, o <strong>Gugabyte</strong>, atravessa seis fases, da origem como designer até os projetos no ar. Um HUD fixo no topo mostra o progresso como barra de XP. A estética é tech, gamer e cyberpunk, mas sem cara de template de IA: tinta escura levemente violeta, amarelo-sódio como sinal e uma única virada para fundo amarelo no meio da história.</p>
+
+    <div class="brief">
+      <div><span class="hud">assunto</span>Gustavo H., designer que hoje constrói e publica as próprias ferramentas com IA.</div>
+      <div><span class="hud">quem vê</span>Clientes, recrutadores e outros designers curiosos sobre vibe coding.</div>
+      <div><span class="hud">trabalho da página</span>Provar, em menos de 2 minutos de scroll, que ele <em>entrega produto funcionando</em>, não só mockup.</div>
+    </div>
+  </div>
+</header>
+
+<!-- PALETA -->
+<section class="doc" id="paleta" data-lvl="LV.1 · paleta">
+  <div class="wrap">
+    <div class="sh"><h2>Paleta</h2><p>Escura, mas não preto neutro. Cada cor tem um papel fixo, e o amarelo só aparece onde há algo pra fazer ou ver.</p></div>
+    <div class="swatches">
+      <div class="sw wide"><div class="chip" style="background:#0D0B14; border-bottom:1px solid var(--wire)"></div><div class="meta"><strong>Void</strong><span class="hud">#0D0B14</span><p>Fundo principal. Preto com um toque violeta: lê como “tela desligada”, não como preto de template.</p></div></div>
+      <div class="sw"><div class="chip" style="background:#17141F"></div><div class="meta"><strong>Carbon</strong><span class="hud">#17141F</span><p>Superfícies: cards, painéis, caixas de diálogo.</p></div></div>
+      <div class="sw"><div class="chip" style="background:#2C2838"></div><div class="meta"><strong>Wire</strong><span class="hud">#2C2838</span><p>Linhas, bordas, grid de fundo.</p></div></div>
+      <div class="sw"><div class="chip" style="background:#ECE8DF"></div><div class="meta"><strong>Bone</strong><span class="hud">#ECE8DF</span><p>Texto e casco do mascote. Branco quente, cansa menos que #FFF no escuro.</p></div></div>
+      <div class="sw"><div class="chip" style="background:#FFC233"></div><div class="meta"><strong>Sodium</strong><span class="hud">#FFC233</span><p>Sinal: CTAs, XP, olhos do mascote, foco de teclado. Amarelo de luz de rua, não verde-ácido.</p></div></div>
+      <div class="sw"><div class="chip" style="background:#8B5CFF"></div><div class="meta"><strong>Ultraviolet</strong><span class="hud">#8B5CFF</span><p>Atmosfera: glow do mascote, brilho ambiente. Nunca em texto corrido.</p></div></div>
+      <div class="sw"><div class="chip" style="background:#FF4D5E"></div><div class="meta"><strong>HP</strong><span class="hud">#FF4D5E</span><p>Só em detalhes de HUD (vida, “rec”, erro). Uma pitada.</p></div></div>
+    </div>
+    <div class="ratio" aria-label="Proporção de uso das cores">
+      <span style="flex:62; background:#0D0B14; color:var(--dim)">void 62%</span>
+      <span style="flex:16; background:#17141F; color:var(--dim)">carbon 16%</span>
+      <span style="flex:12; background:#ECE8DF">bone 12%</span>
+      <span style="flex:6; background:#FFC233">6%</span>
+      <span style="flex:3; background:#8B5CFF"></span>
+      <span style="flex:1; background:#FF4D5E"></span>
+    </div>
+    <p class="hud ratio-legend">proporção de uso aproximada · exceção: a fase “ficha do personagem” inverte para fundo sodium</p>
+  </div>
+</section>
+
+<!-- TIPOGRAFIA -->
+<section class="doc" id="tipo" data-lvl="LV.2 · tipografia">
+  <div class="wrap">
+    <div class="sh"><h2>Tipografia</h2><p>Três vozes: o título de jogo, a conversa e o HUD. A pixel fica só no HUD e no mascote, que é onde o “gamer” vive.</p></div>
+    <div class="types">
+      <div class="ty">
+        <div class="lab"><span class="hud">display</span><strong>Archivo Expanded</strong><span class="hud">wdth 125 · wght 750–900</span><p>Largura máxima, cara de tela-título de jogo de corrida. Usada só em títulos de fase e na capa.</p></div>
+        <div class="spec"><div class="spec-display">Inventário<br>desbloqueado</div></div>
+      </div>
+      <div class="ty">
+        <div class="lab"><span class="hud">texto</span><strong>Host Grotesk</strong><span class="hud">wght 400 / 600</span><p>A mesma das suas ferramentas (gri.d.maker, bento maker…), então o portfólio e os produtos parecem da mesma família.</p></div>
+        <div class="spec"><div class="spec-body">Comecei desenhando telas para os outros programarem. Hoje eu mesmo abro o terminal, escrevo o prompt e coloco no ar.</div></div>
+      </div>
+      <div class="ty">
+        <div class="lab"><span class="hud">hud / utilitária</span><strong>Departure Mono</strong><span class="hud">regular · caixa alta 11–14px</span><p>Monoespaçada pixelada (licença OFL, auto-hospedada). Rótulos, XP, falas do mascote, metadados de projeto.</p></div>
+        <div class="spec"><div class="spec-hud">LV.3 · LOOT 2/5 · XP ████████░░ 78%<br>&gt; gugabyte: achei mais um projeto!</div></div>
+      </div>
+    </div>
+    <div class="scale">
+      <div><span class="hud">título capa</span><span class="hud">clamp 56–140px</span><span style="font-family:var(--f-display);font-variation-settings:'wdth' 125;font-weight:850;font-size:34px;line-height:1">Aa — wdth 125 / 850</span></div>
+      <div><span class="hud">título fase</span><span class="hud">clamp 36–72px</span><span style="font-family:var(--f-display);font-variation-settings:'wdth' 115;font-weight:750;font-size:26px;line-height:1">Aa — wdth 115 / 750</span></div>
+      <div><span class="hud">lead</span><span class="hud">20–22px</span><span style="font-size:20px">Aa — Host Grotesk 400</span></div>
+      <div><span class="hud">corpo</span><span class="hud">16–17px</span><span>Aa — Host Grotesk 400, entrelinha 1.55</span></div>
+      <div><span class="hud">hud</span><span class="hud">11–14px</span><span class="hud" style="color:var(--bone)">Aa — Departure Mono, caixa alta</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ASSINATURA -->
+<section class="doc" id="assinatura" data-lvl="LV.3 · assinatura">
+  <div class="wrap">
+    <div class="sh"><h2>A assinatura: Gugabyte + HUD</h2><p>O único lugar onde o site gasta ousadia. Todo o resto fica quieto e disciplinado em volta dele.</p></div>
+    <div class="signature">
+      <div class="stage">
+        <div class="dialog" id="dlg">&gt; </div>
+        <div class="floor"></div>
+        <div class="main"><svg class="bob" id="hero-sprite" width="160" height="160" viewBox="0 0 16 16" shape-rendering="crispEdges" role="img" aria-label="Gugabyte, mascote em pixel art"></svg></div>
+        <div class="frames">
+          <div><svg data-frame="idle" width="48" height="48" viewBox="0 0 16 16" shape-rendering="crispEdges"></svg><span class="hud">parado</span></div>
+          <div><svg data-frame="blink" width="48" height="48" viewBox="0 0 16 16" shape-rendering="crispEdges"></svg><span class="hud">piscando</span></div>
+          <div><svg data-frame="happy" width="48" height="48" viewBox="0 0 16 16" shape-rendering="crispEdges"></svg><span class="hud">feliz</span></div>
+          <div><svg data-frame="walk" width="48" height="48" viewBox="0 0 16 16" shape-rendering="crispEdges"></svg><span class="hud">andando</span></div>
+        </div>
+      </div>
+      <div class="notes">
+        <h3>Gugabyte</h3>
+        <ul>
+          <li>Robozinho de 16×16 px com cabeça de monitor CRT. O rosto é a tela, então a expressão muda trocando só os pixels dos olhos.</li>
+          <li>Original. Herda do Claude o espírito (pequeno, simpático, pixelado) sem copiar forma nem cor.</li>
+          <li>Desenhado em código (matriz → SVG), sem imagem. Isso deixa trocar estados, cores e “equipamentos” por fase.</li>
+          <li>Narra a história em caixas de diálogo de RPG, com texto digitado letra a letra.</li>
+          <li>Ganha um item por fase: caneta bézier, terminal, mochila de loot, capacete de boss.</li>
+        </ul>
+        <h3>HUD fixo</h3>
+        <ul>
+          <li>A barra de XP é o progresso real do scroll.</li>
+          <li>Mostra o nome da fase atual e um contador de loot (projetos vistos / total).</li>
+          <li>Esta própria página já usa um: role e veja a barra lá em cima.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="hudbar" aria-hidden="true">
+      <span class="logo">GH</span>
+      <div class="xp"><i style="width:42%"></i></div>
+      <span class="hud hide-sm">LV.3 · inventário</span>
+      <span class="hud hide-sm">loot <b>2/5</b></span>
+    </div>
+  </div>
+</section>
+
+<!-- STORYBOARD -->
+<section class="doc" id="story" data-lvl="LV.4 · storyboard">
+  <div class="wrap">
+    <div class="sh"><h2>Storyboard das fases</h2><p>Aqui a numeração é real: é uma sequência de história, e a ordem importa. Cada fase é uma tela (ou uma cena fixada) com uma única ideia.</p></div>
+
+    <div class="levels">
+
+      <!-- LV0 -->
+      <div class="lvl">
+        <div class="wf" style="--p:2%">
+          <div class="bar"><span>GH</span><span class="x"></span><span>LV.0 BOOT</span></div>
+          <div class="line thin" style="left:6%; top:16%; width:30%"></div>
+          <div class="line" style="left:6%; top:30%; width:52%; height:11%"></div>
+          <div class="line y" style="left:6%; top:44%; width:44%; height:11%"></div>
+          <div class="line thin" style="left:6%; top:62%; width:38%"></div>
+          <div class="line thin" style="left:6%; top:67%; width:30%"></div>
+          <div class="box" style="left:6%; top:76%; width:18%; height:8%">ver projetos</div>
+          <svg class="sprite" data-frame="idle" style="left:70%; top:32%; width:17%" viewBox="0 0 16 16" shape-rendering="crispEdges"></svg>
+          <div class="box" style="left:63%; top:66%; width:31%; height:6%">plataforma de spawn</div>
+          <span style="position:absolute; left:41%; bottom:5%">▼ role pra dar start</span>
+        </div>
+        <div>
+          <span class="hud">LV.0 · boot</span>
+          <h3>Tela de start</h3>
+          <p class="copy">“Eu parei de entregar mockup.”</p>
+          <p>Abre com uma sequência curta de boot no HUD (0,8s). O título monta em Archivo Expanded e o Gugabyte “liga” a tela-rosto. Nada de estatística, gradiente ou foto: a tese é a frase.</p>
+          <dl><dt>movimento</dt><dd>Entrada orquestrada uma vez só; depois tudo para.</dd><dt>componente</dt><dd>Texto com efeito “scramble/decrypt” (21st.dev) no subtítulo.</dd></dl>
+        </div>
+      </div>
+
+      <!-- LV1 -->
+      <div class="lvl">
+        <div class="wf" style="--p:18%">
+          <div class="bar"><span>GH</span><span class="x"></span><span>LV.1 ORIGEM</span></div>
+          <div class="line" style="left:6%; top:18%; width:34%; height:7%"></div>
+          <div class="line thin" style="left:6%; top:31%; width:36%"></div>
+          <div class="line thin" style="left:6%; top:36%; width:32%"></div>
+          <div class="line thin" style="left:6%; top:41%; width:35%"></div>
+          <div class="line thin" style="left:6%; top:56%; width:36%"></div>
+          <div class="line thin" style="left:6%; top:61%; width:28%"></div>
+          <div class="box" style="left:50%; top:16%; width:20%; height:44%">frame<br>vetorial</div>
+          <span style="position:absolute; left:72%; top:35%; color:var(--sodium)">→</span>
+          <div class="box" style="left:76%; top:16%; width:19%; height:44%; place-items:start; text-align:left; padding:6px">&lt;div&gt;<br>&nbsp;&lt;Card/&gt;<br>&lt;/div&gt;</div>
+          <svg class="sprite" data-frame="idle" style="left:64%; top:66%; width:11%" viewBox="0 0 16 16" shape-rendering="crispEdges"></svg>
+          <span class="tag" style="left:50%; bottom:6%">painel fixo (pin)</span>
+        </div>
+        <div>
+          <span class="hud">LV.1 · origem</span>
+          <h3>O designer</h3>
+          <p class="copy">“Comecei desenhando telas pra outras pessoas programarem.”</p>
+          <p>Texto rola na esquerda; à direita, um painel fixo mostra um frame de design (caixas, bézier) que, conforme o scroll avança, <em>compila</em> em linhas de código. É a transição designer → vibe coder em uma imagem só.</p>
+          <dl><dt>movimento</dt><dd>GSAP ScrollTrigger com scrub: o progresso do scroll é a transformação.</dd><dt>mascote</dt><dd>Segura a caneta bézier; no fim troca pelo terminal.</dd></dl>
+        </div>
+      </div>
+
+      <!-- LV2 -->
+      <div class="lvl">
+        <div class="wf" style="--p:36%">
+          <div class="bar"><span>GH</span><span class="x"></span><span>LV.2 MÉTODO</span></div>
+          <div class="line" style="left:6%; top:16%; width:30%; height:7%"></div>
+          <div style="position:absolute; left:10%; right:10%; top:56%; height:1px; background:var(--wire)"></div>
+          <div class="box" style="left:8%;  top:50%; width:9%; height:13%; border-color:var(--sodium); color:var(--sodium)">1</div>
+          <div class="box" style="left:33%; top:50%; width:9%; height:13%; border-color:var(--sodium); color:var(--sodium)">2</div>
+          <div class="box" style="left:58%; top:50%; width:9%; height:13%">3</div>
+          <div class="box" style="left:83%; top:50%; width:9%; height:13%">4</div>
+          <span style="position:absolute; left:8%;  top:68%">ideia</span>
+          <span style="position:absolute; left:33%; top:68%">prompt</span>
+          <span style="position:absolute; left:58%; top:68%">iteração</span>
+          <span style="position:absolute; left:83%; top:68%">deploy</span>
+          <svg class="sprite" data-frame="happy" style="left:33.5%; top:28%; width:8%" viewBox="0 0 16 16" shape-rendering="crispEdges"></svg>
+          <div class="line thin" style="left:6%; top:82%; width:40%"></div>
+        </div>
+        <div>
+          <span class="hud">LV.2 · método</span>
+          <h3>Como eu construo</h3>
+          <p class="copy">Ideia → Prompt → Iteração → Deploy</p>
+          <p>Uma trilha de 4 nós, como mapa de fases de jogo. O Gugabyte pula de nó em nó com o scroll; cada nó abre um cartão curto com um exemplo real (um prompt de verdade, um antes/depois, um commit).</p>
+          <dl><dt>movimento</dt><dd>Seção fixada; o pulo do mascote é a única animação.</dd><dt>componente</dt><dd>Timeline/stepper (Origin UI) com o estilo reescrito.</dd></dl>
+        </div>
+      </div>
+
+      <!-- LV3 -->
+      <div class="lvl">
+        <div class="wf" style="--p:58%">
+          <div class="bar"><span>GH</span><span class="x"></span><span>LV.3 LOOT 2/5</span></div>
+          <div class="line" style="left:6%; top:14%; width:34%; height:7%"></div>
+          <div class="box" style="left:6%;  top:28%; width:24%; height:42%">gri.d.maker<br><br>★ raro</div>
+          <div class="box" style="left:33%; top:28%; width:24%; height:42%; border-color:var(--sodium); color:var(--sodium)">bento maker<br><br>★★ épico</div>
+          <div class="box" style="left:60%; top:28%; width:24%; height:42%">gradient maker</div>
+          <div class="box" style="left:87%; top:28%; width:24%; height:42%">logo…</div>
+          <div style="position:absolute; left:0; right:0; top:84%; height:1px; background:var(--wire)"></div>
+          <svg class="sprite" data-frame="walk" style="left:40%; top:72%; width:7%" viewBox="0 0 16 16" shape-rendering="crispEdges"></svg>
+          <span class="tag" style="right:3%; top:13%">scroll ↓ = anda →</span>
+        </div>
+        <div>
+          <span class="hud">LV.3 · inventário</span>
+          <h3>Os projetos</h3>
+          <p class="copy">“Coisas que eu fiz e que estão no ar.”</p>
+          <p>Scroll vertical vira caminhada horizontal: o Gugabyte anda no chão e os projetos passam como slots de inventário. Cada card tem raridade, stack usada e link pra abrir a ferramenta ao vivo. O contador de loot no HUD sobe a cada card.</p>
+          <dl><dt>candidatos</dt><dd>gri.d.maker, bento maker, gradient maker, logo sizer, Mask Studio.</dd><dt>componente</dt><dd>Card com tilt/spotlight (21st.dev); clique abre um painel de detalhe.</dd></dl>
+        </div>
+      </div>
+
+      <!-- LV4 -->
+      <div class="lvl">
+        <div class="wf yellow" style="--p:80%">
+          <div class="bar"><span>GH</span><span class="x"></span><span>LV.4 FICHA</span></div>
+          <div class="line" style="left:6%; top:14%; width:40%; height:8%"></div>
+          <svg class="sprite" data-frame="happy" data-ink="dark" style="left:14%; top:34%; width:18%" viewBox="0 0 16 16" shape-rendering="crispEdges"></svg>
+          <div class="box" style="left:5%;  top:34%; width:7%; height:11%">fig</div>
+          <div class="box" style="left:5%;  top:52%; width:7%; height:11%">cc</div>
+          <div class="box" style="left:34%; top:34%; width:7%; height:11%">re</div>
+          <div class="box" style="left:34%; top:52%; width:7%; height:11%">tw</div>
+          <span style="position:absolute; left:52%; top:32%">design</span><div class="line" style="left:66%; top:33%; width:28%; height:3%"></div>
+          <span style="position:absolute; left:52%; top:42%">prompt</span><div class="line" style="left:66%; top:43%; width:24%; height:3%"></div>
+          <span style="position:absolute; left:52%; top:52%">front</span><div class="line" style="left:66%; top:53%; width:18%; height:3%"></div>
+          <span style="position:absolute; left:52%; top:62%">motion</span><div class="line" style="left:66%; top:63%; width:20%; height:3%"></div>
+          <div class="line thin" style="left:6%; top:82%; width:50%"></div>
+        </div>
+        <div>
+          <span class="hud">LV.4 · ficha do personagem</span>
+          <h3>Stack e atributos</h3>
+          <p class="copy">A única tela amarela do site.</p>
+          <p>Virada brusca: o fundo inverte pra sodium com tinta void, como menu de pausa de jogo. Slots de equipamento em volta do mascote (Figma, Claude Code, React, Tailwind…) e barras de atributo honestas, com uma pitada de humor.</p>
+          <dl><dt>por quê</dt><dd>Quebra o ritmo escuro no ponto em que a atenção cai e marca o site na memória.</dd><dt>componente</dt><dd>Progress/badge (Origin UI) com o tema invertido.</dd></dl>
+        </div>
+      </div>
+
+      <!-- LV5 -->
+      <div class="lvl">
+        <div class="wf" style="--p:100%">
+          <div class="bar"><span>GH</span><span class="x"></span><span>LV.5 CONTINUE?</span></div>
+          <span style="position:absolute; left:0; right:0; top:20%; text-align:center; font-size:16px; color:var(--bone)">CONTINUE?</span>
+          <span style="position:absolute; left:0; right:0; top:30%; text-align:center; font-size:44px; line-height:1; color:var(--sodium)">7</span>
+          <div class="box" style="left:28%; top:62%; width:20%; height:9%; border-color:var(--sodium); color:var(--sodium)">mandar e-mail</div>
+          <div class="box" style="left:52%; top:62%; width:20%; height:9%">linkedin / github</div>
+          <svg class="sprite" data-frame="idle" style="left:46%; top:76%; width:7%" viewBox="0 0 16 16" shape-rendering="crispEdges"></svg>
+        </div>
+        <div>
+          <span class="hud">LV.5 · continue?</span>
+          <h3>Contato</h3>
+          <p class="copy">“Continue? Bora fazer o próximo juntos.”</p>
+          <p>Tela de “continue” de fliperama com contagem regressiva em pixel. Os botões são o contato. Se a contagem zerar, o mascote diz “game over… brincadeira” e oferece voltar pro topo.</p>
+          <dl><dt>movimento</dt><dd>A contagem só começa quando a seção está visível; fica pausada com reduced-motion.</dd><dt>componente</dt><dd>Botões e input de e-mail (Origin UI).</dd></dl>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- MOTION + STACK -->
+<section class="doc" id="tech" data-lvl="LV.5 · stack">
+  <div class="wrap">
+    <div class="sh"><h2>Motion e stack</h2><p>Animação concentrada em três momentos: o boot, a compilação (LV.1) e a caminhada (LV.3). Fora disso, o site fica parado e legível.</p></div>
+    <div class="stack">
+      <div><span class="hud">base</span><strong>Vite + React + TypeScript</strong><p>Rápido de rodar e o formato que o 21st.dev e o Origin UI esperam.</p></div>
+      <div><span class="hud">estilo</span><strong>Tailwind v4 + shadcn/ui</strong><p>É o encanamento que permite instalar componentes externos com um comando e herdar a paleta via tokens.</p></div>
+      <div><span class="hud">scroll</span><strong>GSAP ScrollTrigger + Lenis</strong><p>Cenas fixadas com scrub, e um scroll suave que não briga com o trackpad.</p></div>
+      <div><span class="hud">micro</span><strong>Motion (Framer)</strong><p>Hover, entrada de cards, troca de estado do mascote.</p></div>
+      <div><span class="hud">conteúdo</span><strong>Arquivos de dados</strong><p>Projetos e textos em <code>src/content/</code>. Pra adicionar um projeto, você edita uma lista, sem mexer em componente.</p></div>
+      <div><span class="hud">no ar</span><strong>Vercel</strong><p>Deploy a cada push, com preview por branch.</p></div>
+    </div>
+<pre># como um componente externo entra no site
+npx shadcn@latest add "https://21st.dev/r/&lt;autor&gt;/&lt;componente&gt;"
+npx shadcn@latest add "https://originui.com/r/&lt;componente&gt;.json"
+# → cai em src/components/ui/ e já usa as cores Void/Sodium via tokens</pre>
+    <p class="hud" style="margin-top:14px">acessibilidade: foco de teclado em sodium · prefers-reduced-motion vira história estática · tudo legível a 375px</p>
+  </div>
+</section>
+
+<!-- REVISÃO + PERGUNTAS -->
+<section class="doc" id="decisoes" data-lvl="LV.6 · decisões">
+  <div class="wrap">
+    <div class="sh"><h2>O que revisei e o que falta decidir</h2></div>
+    <div class="two">
+      <div style="display:grid; gap:12px; align-content:start">
+        <div class="rev"><span class="hud">cor</span><s>Preto neutro + ciano/magenta neon</s> → void violeta + sodium. O neon ciano/rosa é o cyberpunk que todo mundo já viu; o amarelo-sódio remete a Cyberpunk 2077 e a placa de rua sem cair no clichê.</div>
+        <div class="rev"><span class="hud">fundo</span><s>Escuro do início ao fim</s> → uma fase em amarelo. Um site 100% escuro com um acento é o look padrão de IA. A inversão na ficha do personagem é o risco estético do projeto.</div>
+        <div class="rev"><span class="hud">tipo</span><s>Space Grotesk / JetBrains Mono</s> → Archivo Expanded + Departure Mono. As duas primeiras denunciam “site feito com IA” na hora.</div>
+        <div class="rev"><span class="hud">hero</span><s>Número grande + gradiente</s> → uma frase-tese e o mascote ligando.</div>
+      </div>
+      <ol class="qs">
+        <li><strong>Nome do mascote</strong><span>“Gugabyte” funciona pra você, ou prefere outro nome ou outro formato de personagem?</span></li>
+        <li><strong>Idioma</strong><span>Só português, só inglês ou bilíngue com alternância PT/EN no HUD?</span></li>
+        <li><strong>Projetos do inventário</strong><span>Confirma os 5 (gri.d.maker, bento maker, gradient maker, logo sizer, Mask Studio)? Vou precisar dos links e prints.</span></li>
+        <li><strong>“OriginKit”</strong><span>É o Origin UI (originui.com, hoje parte do coss.com)? Se for outra biblioteca, me passa o link.</span></li>
+        <li><strong>Contato</strong><span>Quais canais entram no “Continue?”: e-mail, LinkedIn, GitHub, Behance, Instagram?</span></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<footer><div class="wrap"><span class="hud">fim do plano · aprovado isto, o próximo passo é montar o esqueleto do projeto e a capa (LV.0)</span></div></footer>
+
+<script>
+// ---- Gugabyte: matriz 16x16 → SVG ----
+const PAL = { A:"#FFC233", D:"#8F8A9C", B:"#ECE8DF", K:"#B9B3C6", S:"#17141F", E:"#FFC233", V:"#8B5CFF" };
+const PAL_DARK = { A:"#0D0B14", D:"#0D0B14", B:"#0D0B14", K:"#2C2838", S:"#FFC233", E:"#0D0B14", V:"#2C2838" };
+const head = [
+  ".......A........",
+  ".......D........",
+  "...BBBBBBBBBB...",
+  "..BBBBBBBBBBBB..",
+  "..BSSSSSSSSSSB..",
+  "..BSSSSSSSSSSB..",
+];
+const wrapRow = inner => "..B" + inner + "B..";
+const face = {
+  idle:  ["SSESSSSESS","SSESSSSESS","SSSSSSSSSS","SSSSSSSSSS"],
+  blink: ["SSSSSSSSSS","SSESSSSESS","SSSSSSSSSS","SSSSSSSSSS"],
+  happy: ["SSESSSSESS","SESESSESES","SSSSSSSSSS","SSSSEESSSS"],
+};
+const neck = ["..BBBBBBBBBBBB..", "...KKKKKKKKKK...", "...VBBBBBBBBV...", "...V.BBBBBB.V..."];
+const legsA = [".....BB..BB.....", ".....KK..KK....."];
+const legsB = ["....BB....BB....", "....KK....KK...."];
+function frame(name, step = 0) {
+  const f = face[name === "walk" ? "idle" : name];
+  const legs = name === "walk" && step % 2 ? legsB : legsA;
+  return [...head, ...f.map(wrapRow), ...neck, ...legs];
+}
+function draw(svg, name, step = 0) {
+  const pal = svg.dataset.ink === "dark" ? PAL_DARK : PAL;
+  const rows = frame(name, step);
+  let out = "";
+  rows.forEach((r, y) => [...r].forEach((c, x) => {
+    if (c !== ".") out += `<rect x="${x}" y="${y}" width="1" height="1" fill="${pal[c]}"/>`;
+  }));
+  svg.innerHTML = out;
+}
+document.querySelectorAll("svg[data-frame]").forEach(s => draw(s, s.dataset.frame));
+
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const hero = document.getElementById("hero-sprite");
+let t = 0;
+draw(hero, "idle");
+if (!reduce) {
+  setInterval(() => { t++; draw(hero, t % 12 === 0 ? "blink" : (t % 24 > 18 ? "happy" : "idle")); }, 250);
+  let w = 0;
+  setInterval(() => { w++; document.querySelectorAll('svg[data-frame="walk"]').forEach(s => draw(s, "walk", w)); }, 300);
+}
+
+// ---- caixa de diálogo com texto digitado ----
+const lines = [
+  "> oi! eu sou o gugabyte.",
+  "> eu vou te guiar pelo portfólio do gustavo.",
+  "> role pra baixo. tem loot no caminho.",
+];
+const dlg = document.getElementById("dlg");
+let li = 0;
+function type(str, i = 0) {
+  dlg.textContent = str.slice(0, i) || ">";
+  if (i < str.length) return setTimeout(() => type(str, i + 1), 34);
+  setTimeout(() => { li = (li + 1) % lines.length; type(lines[li]); }, 2200);
+}
+if (reduce) dlg.textContent = lines[0]; else type(lines[0]);
+
+// ---- HUD: XP = progresso do scroll ----
+const xp = document.getElementById("xp");
+const lvl = document.getElementById("lvlname");
+const secs = [...document.querySelectorAll("[data-lvl]")];
+function onScroll() {
+  const max = document.documentElement.scrollHeight - innerHeight;
+  xp.style.width = (max > 0 ? scrollY / max * 100 : 0) + "%";
+  let name = "LV.0 · capa";
+  secs.forEach(s => { if (s.getBoundingClientRect().top < innerHeight * 0.4) name = s.dataset.lvl; });
+  lvl.textContent = name;
+}
+addEventListener("scroll", onScroll, { passive: true });
+onScroll();
+</script>
+</body>
+</html>

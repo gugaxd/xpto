@@ -1,0 +1,665 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plano visual v0.2 — gustavoh.dev</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Host+Grotesk:wght@300..800&display=swap" rel="stylesheet">
+<style>
+@font-face {
+  font-family: "Departure Mono";
+  src: url("https://cdn.jsdelivr.net/gh/rektdeckard/departure-mono@main/public/assets/DepartureMono-Regular.woff2") format("woff2");
+  font-display: swap;
+}
+/* Tema B — Neon arcade (padrão) */
+:root, :root[data-theme="neon"] {
+  --void: #0B0710;
+  --carbon: #150E1A;
+  --wire: #2A1C33;
+  --text: #F2E6EE;
+  --dim: #9A8AA3;
+  --acc: #FF2E88;
+  --acc-dim: #7A1F55;
+  --code: #00FF41;
+  --on-acc: #0B0710;
+}
+/* Tema A — Fósforo */
+:root[data-theme="fosforo"] {
+  --void: #050A07;
+  --carbon: #0B140F;
+  --wire: #18291F;
+  --text: #E2F2E6;
+  --dim: #7F9787;
+  --acc: #00FF41;
+  --acc-dim: #0B6B2E;
+  --code: #FF2E88;
+  --on-acc: #050A07;
+}
+:root {
+  --f-display: "Archivo", system-ui, sans-serif;
+  --f-body: "Host Grotesk", system-ui, sans-serif;
+  --f-hud: "Departure Mono", ui-monospace, monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { background: var(--void); }
+body {
+  background: var(--void); color: var(--text);
+  font-family: var(--f-body); font-size: 16px; line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  transition: background .4s, color .4s;
+}
+.wrap { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+@media (max-width: 600px) { .wrap { padding: 0 16px; } }
+.hud { font-family: var(--f-hud); font-size: 13px; letter-spacing: .02em; text-transform: uppercase; color: var(--dim); }
+.hud b { color: var(--acc); font-weight: 400; }
+:focus-visible { outline: 2px solid var(--acc); outline-offset: 3px; }
+
+/* --- topo --- */
+.top { position: sticky; top: 0; z-index: 40; background: color-mix(in srgb, var(--void) 90%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--wire); }
+.top .wrap { display: flex; align-items: center; gap: 16px; height: 54px; }
+.top .hud { white-space: nowrap; }
+.xp { flex: 1; height: 8px; background: var(--carbon); border: 1px solid var(--wire); position: relative; }
+.xp i { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--acc); }
+.toggle { display: flex; border: 1px solid var(--wire); }
+.toggle button {
+  font-family: var(--f-hud); font-size: 12px; text-transform: uppercase; letter-spacing: .02em;
+  background: none; border: 0; color: var(--dim); padding: 7px 10px; cursor: pointer; display: flex; align-items: center; gap: 6px;
+}
+.toggle button i { width: 9px; height: 9px; display: inline-block; }
+.toggle button[aria-pressed="true"] { background: var(--acc); color: var(--on-acc); }
+@media (max-width: 640px) { .top .hide-sm { display: none; } }
+
+/* --- capa --- */
+.cover { padding: 80px 0 64px; border-bottom: 1px solid var(--wire); }
+.cover h1 {
+  font-family: var(--f-display); font-variation-settings: "wdth" 125; font-weight: 850;
+  font-size: clamp(38px, 6.6vw, 84px); line-height: .93; letter-spacing: -.025em;
+  margin: 16px 0 26px; max-width: 14ch;
+}
+.cover h1 em { font-style: normal; color: var(--acc); }
+.changes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--wire); border: 1px solid var(--wire); margin-top: 40px; }
+.changes div { background: var(--void); padding: 18px 20px; }
+.changes .hud { display: block; margin-bottom: 6px; }
+.changes s { color: var(--dim); }
+@media (max-width: 760px) { .changes { grid-template-columns: 1fr; } }
+
+section.doc { padding: 76px 0; border-bottom: 1px solid var(--wire); }
+.sh { display: flex; align-items: baseline; gap: 16px; margin-bottom: 32px; flex-wrap: wrap; }
+.sh h2 { font-family: var(--f-display); font-variation-settings: "wdth" 112; font-weight: 750; font-size: clamp(28px, 4vw, 44px); line-height: 1; letter-spacing: -.02em; }
+.sh p { color: var(--dim); max-width: 56ch; }
+
+/* ================= DEMO: arcade + level ================= */
+.stage {
+  position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden;
+  border: 1px solid var(--wire); background: #000; container-type: inline-size;
+  user-select: none; touch-action: pan-y;
+}
+.stage:focus-visible { outline-offset: 4px; }
+
+/* sala do arcade */
+.room { position: absolute; inset: 0; transform-origin: 0 0; will-change: transform; }
+.room.zooming { transition: transform 1.25s cubic-bezier(.75, 0, .2, 1); }
+.wall { position: absolute; inset: 0 0 24% 0; background:
+  radial-gradient(40% 70% at 66% 55%, color-mix(in srgb, var(--acc) 16%, transparent), transparent 70%),
+  repeating-linear-gradient(90deg, transparent 0 3.9cqw, color-mix(in srgb, var(--wire) 55%, transparent) 3.9cqw 4cqw),
+  var(--void); }
+.floor { position: absolute; inset: 76% 0 0 0; background:
+  radial-gradient(30% 60% at 66% 0%, color-mix(in srgb, var(--acc) 22%, transparent), transparent 70%),
+  linear-gradient(var(--carbon), #000); border-top: 1px solid var(--wire); }
+
+.title { position: absolute; left: 6cqw; top: 15cqw; width: 34cqw; transition: opacity .35s; }
+.title .hud { font-size: 1.15cqw; }
+.title h3 { font-family: var(--f-display); font-variation-settings: "wdth" 125; font-weight: 850; font-size: 4.4cqw; line-height: .95; letter-spacing: -.02em; margin: 1.2cqw 0 2.4cqw; }
+.title h3 em { font-style: normal; color: var(--acc); }
+.enter {
+  font-family: var(--f-hud); font-size: 1.5cqw; text-transform: uppercase; letter-spacing: .04em;
+  background: var(--acc); color: var(--on-acc); border: 0; padding: 1.1cqw 2.2cqw; cursor: pointer;
+  box-shadow: 0 0 0 .3cqw var(--void), 0 0 0 .45cqw var(--acc), 0 0 3cqw color-mix(in srgb, var(--acc) 45%, transparent);
+}
+.enter:hover { filter: brightness(1.12); }
+.title .credit { margin-top: 2cqw; display: block; font-size: 1.1cqw; }
+.blink { animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* gabinete */
+.cab { position: absolute; left: 66cqw; bottom: 9cqw; width: 22cqw; transform: translateX(-50%); }
+.cab.ghost { width: 17cqw; filter: brightness(.35) saturate(.4); bottom: 10.5cqw; }
+.cab.ghost .marquee span, .cab.ghost .screen > * { visibility: hidden; }
+.marquee {
+  height: 5.2cqw; background: var(--acc); display: grid; place-items: center;
+  border: .5cqw solid var(--carbon); border-bottom: 0;
+  box-shadow: 0 0 4cqw color-mix(in srgb, var(--acc) 55%, transparent);
+}
+.marquee span { font-family: var(--f-display); font-variation-settings: "wdth" 125; font-weight: 900; font-size: 1.9cqw; letter-spacing: .02em; color: var(--on-acc); }
+.bezel { background: var(--carbon); padding: 1.4cqw 1.6cqw 1.8cqw; border-left: .5cqw solid #000; border-right: .5cqw solid #000; }
+.screen {
+  aspect-ratio: 4 / 3; background: #000; position: relative; overflow: hidden; display: grid; place-items: center; align-content: center; gap: .8cqw;
+  border: .35cqw solid #000; box-shadow: inset 0 0 2.4cqw color-mix(in srgb, var(--acc) 35%, transparent);
+}
+.screen::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(to bottom, rgba(255,255,255,.06) 0 1px, transparent 1px 3px); pointer-events: none; }
+.screen .ins { font-family: var(--f-hud); font-size: 1.05cqw; color: var(--acc); text-transform: uppercase; }
+.panel { height: 4.2cqw; margin: 0 -1.4cqw; background: var(--wire); clip-path: polygon(5% 0, 95% 0, 100% 100%, 0 100%); position: relative; }
+.panel .stick { position: absolute; left: 22%; top: .7cqw; width: 1.5cqw; height: 1.5cqw; border-radius: 50%; background: var(--acc); box-shadow: 0 1.2cqw 0 -.45cqw #000; }
+.panel .btns { position: absolute; right: 18%; top: 1.3cqw; display: flex; gap: .7cqw; }
+.panel .btns i { width: 1.2cqw; height: 1.2cqw; border-radius: 50%; background: var(--text); opacity: .85; }
+.panel .btns i:first-child { background: var(--acc); opacity: 1; }
+.body { height: 15cqw; background: var(--carbon); border-left: .5cqw solid #000; border-right: .5cqw solid #000; position: relative; display: grid; place-items: center; }
+.body::before { content: ""; position: absolute; left: 8%; right: 8%; top: 1.2cqw; height: .3cqw; background: var(--acc-dim); }
+.coin { width: 5cqw; height: 6cqw; background: #000; border: .25cqw solid var(--wire); display: flex; justify-content: center; gap: .9cqw; padding-top: 1.4cqw; }
+.coin i { width: .5cqw; height: 1.6cqw; background: var(--acc); box-shadow: 0 0 1cqw var(--acc); }
+.room.lit .coin i { animation: coin .25s steps(2) 3; }
+@keyframes coin { 50% { background: var(--text); } }
+
+/* CRT ligando */
+.crt { position: absolute; inset: 0; pointer-events: none; display: none; z-index: 5; }
+.crt::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 100%; margin-top: -50%; background: var(--text); transform: scale(0, .004); }
+.crt.on { display: block; }
+.crt.on::before { animation: crt .6s cubic-bezier(.2,.8,.2,1) forwards; }
+@keyframes crt {
+  0% { transform: scale(0, .004); opacity: 1; }
+  35% { transform: scale(1, .004); opacity: 1; }
+  70% { transform: scale(1, 1); opacity: .8; }
+  100% { transform: scale(1, 1); opacity: 0; }
+}
+
+/* level */
+.level { position: absolute; inset: 0; opacity: 0; visibility: hidden; background: var(--void); }
+.level.show { opacity: 1; visibility: visible; }
+.level::after { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 4; background: repeating-linear-gradient(to bottom, rgba(255,255,255,.025) 0 1px, transparent 1px 3px); }
+.sky { position: absolute; left: 0; top: 0; height: 100%; width: 260%; will-change: transform; }
+.world { position: absolute; left: 0; top: 0; height: 100%; width: 500%; will-change: transform; }
+.ground { position: absolute; left: 0; right: 0; bottom: 0; height: 12cqw; border-top: .3cqw solid var(--acc);
+  background: repeating-linear-gradient(90deg, var(--carbon) 0 3cqw, var(--wire) 3cqw 3.15cqw), var(--carbon); }
+.ground::before { content: ""; position: absolute; left: 0; right: 0; top: 1.2cqw; height: .2cqw; background: repeating-linear-gradient(90deg, var(--acc-dim) 0 1cqw, transparent 1cqw 2cqw); }
+.band { position: absolute; top: 0; bottom: 12cqw; background: var(--acc); }
+.post { position: absolute; bottom: 12cqw; display: grid; justify-items: start; }
+.post .sign { font-family: var(--f-hud); font-size: 1.15cqw; text-transform: uppercase; background: var(--void); color: var(--acc); border: .2cqw solid var(--acc); padding: .4cqw .8cqw; white-space: nowrap; }
+.post .pole { width: .4cqw; height: 5cqw; background: var(--wire); margin-left: 1.2cqw; }
+.prop { position: absolute; font-family: var(--f-hud); text-transform: uppercase; color: var(--dim); }
+.frame-box { border: .2cqw dashed var(--dim); display: grid; place-items: center; font-size: 1cqw; }
+.code-box { border: .2cqw solid var(--code); color: var(--code); font-size: 1.1cqw; padding: .8cqw; line-height: 1.5; text-transform: none; }
+.step { position: absolute; bottom: 12cqw; width: 6cqw; background: var(--carbon); border: .2cqw solid var(--wire); border-bottom: 0; display: grid; place-items: start center; padding-top: .6cqw; font-family: var(--f-hud); font-size: 1cqw; color: var(--acc); text-transform: uppercase; }
+.loot { position: absolute; bottom: 12cqw; width: 7cqw; }
+.loot .scr { aspect-ratio: 4/3; background: #000; border: .5cqw solid var(--carbon); border-top-width: 1.6cqw; box-shadow: 0 -.3cqw 0 var(--acc) inset; display: grid; place-items: center; font-family: var(--f-hud); font-size: .85cqw; color: var(--acc); text-align: center; line-height: 1.2; }
+.loot .base { height: 6cqw; background: var(--carbon); border-left: .4cqw solid #000; border-right: .4cqw solid #000; }
+.stat { font-family: var(--f-hud); font-size: 1.1cqw; color: var(--on-acc); text-transform: uppercase; display: grid; grid-template-columns: 7cqw 14cqw; gap: .8cqw; align-items: center; margin-bottom: 1cqw; }
+.stat i { height: 1cqw; background: var(--on-acc); display: block; }
+.cont { position: absolute; bottom: 20cqw; text-align: center; font-family: var(--f-hud); text-transform: uppercase; }
+.cont b { display: block; font-family: var(--f-display); font-variation-settings: "wdth" 125; font-weight: 900; font-size: 6cqw; line-height: 1; color: var(--text); }
+.cont span { display: block; font-size: 5cqw; color: var(--acc); line-height: 1.1; }
+
+.hero { position: absolute; left: 22%; bottom: 12cqw; width: 6.5cqw; height: 6.5cqw; transform: translateX(-50%); z-index: 2; }
+.hero svg { width: 100%; height: 100%; display: block; }
+.hero.left svg { transform: scaleX(-1); }
+
+.lhud { position: absolute; left: 0; right: 0; top: 0; z-index: 3; display: flex; align-items: center; gap: 1.6cqw; padding: 1.4cqw 2.4cqw; font-family: var(--f-hud); font-size: 1.15cqw; text-transform: uppercase; color: var(--dim); }
+.lhud strong { font-family: var(--f-display); font-variation-settings: "wdth" 125; font-weight: 900; color: var(--text); font-size: 1.6cqw; }
+.lhud .bar { flex: 1; height: .8cqw; border: 1px solid var(--wire); background: var(--carbon); position: relative; }
+.lhud .bar i { position: absolute; inset: 0 auto 0 0; background: var(--acc); width: 0; }
+.ldlg { position: absolute; left: 2.4cqw; top: 5.2cqw; z-index: 3; width: 44cqw; min-height: 6cqw; background: var(--void); border: .25cqw solid var(--text); padding: 1.1cqw 1.4cqw; font-family: var(--f-hud); font-size: 1.45cqw; line-height: 1.45; }
+.ctrl { position: absolute; right: 2.4cqw; bottom: 2.4cqw; z-index: 3; display: flex; gap: .8cqw; }
+.ctrl button { font-family: var(--f-hud); font-size: 1.4cqw; width: 4.4cqw; height: 4.4cqw; background: var(--void); color: var(--text); border: .2cqw solid var(--wire); cursor: pointer; }
+.ctrl button:hover { border-color: var(--acc); color: var(--acc); }
+.hint { position: absolute; left: 2.4cqw; bottom: 3.6cqw; z-index: 3; font-family: var(--f-hud); font-size: 1.1cqw; text-transform: uppercase; color: var(--dim); }
+
+.demo-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 12px; flex-wrap: wrap; }
+.ghost-btn { font-family: var(--f-hud); font-size: 12px; text-transform: uppercase; background: none; color: var(--text); border: 1px solid var(--wire); padding: 8px 12px; cursor: pointer; }
+.ghost-btn:hover { border-color: var(--acc); color: var(--acc); }
+
+/* storyboard da intro */
+.seq { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--wire); border: 1px solid var(--wire); margin-top: 28px; }
+.seq div { background: var(--void); padding: 18px 18px 20px; }
+.seq strong { display: block; margin: 4px 0 6px; font-size: 17px; }
+.seq p { font-size: 14px; color: var(--dim); }
+@media (max-width: 860px) { .seq { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 520px) { .seq { grid-template-columns: 1fr; } }
+
+/* paletas */
+.palettes { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 860px) { .palettes { grid-template-columns: 1fr; } }
+.pal { border: 1px solid var(--wire); padding: 20px; position: relative; }
+.pal.rec::after { content: "recomendado"; position: absolute; top: -1px; right: -1px; font-family: var(--f-hud); font-size: 11px; text-transform: uppercase; padding: 4px 8px; background: var(--acc); color: var(--on-acc); }
+.pal h3 { font-family: var(--f-display); font-variation-settings: "wdth" 115; font-weight: 750; font-size: 24px; margin: 4px 0 4px; }
+.pal > p { color: var(--dim); font-size: 15px; margin-bottom: 16px; }
+.chips { display: grid; grid-template-columns: repeat(6, 1fr); border: 1px solid #222; }
+.chips div { aspect-ratio: 1 / 1.25; display: flex; align-items: flex-end; padding: 6px; font-family: var(--f-hud); font-size: 10px; line-height: 1.2; }
+.pal-demo { margin-top: 14px; padding: 16px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.pal-demo .t { font-family: var(--f-display); font-variation-settings: "wdth" 125; font-weight: 850; font-size: 26px; line-height: 1; }
+.pal-demo .c { font-family: var(--f-hud); font-size: 13px; }
+.pal-demo .b { font-family: var(--f-hud); font-size: 12px; text-transform: uppercase; padding: 7px 10px; }
+
+/* mapa */
+.map-scroll { overflow-x: auto; border: 1px solid var(--wire); background: var(--carbon); }
+.map { display: grid; grid-template-columns: repeat(6, 260px); position: relative; padding: 28px 0 0; min-width: 1560px; }
+.map::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 10px; border-top: 2px solid var(--acc); background: repeating-linear-gradient(90deg, var(--wire) 0 20px, var(--carbon) 20px 22px); }
+.zone { padding: 0 20px 34px; border-left: 1px dashed var(--wire); }
+.zone:first-child { border-left: 0; }
+.zone .hud { color: var(--acc); }
+.zone strong { display: block; font-family: var(--f-display); font-variation-settings: "wdth" 115; font-weight: 750; font-size: 20px; margin: 4px 0 8px; line-height: 1.1; }
+.zone p { font-size: 14px; color: #c9bfcc; margin-bottom: 10px; }
+:root[data-theme="fosforo"] .zone p { color: #bccfc1; }
+.zone dl { font-size: 13px; display: grid; gap: 4px; }
+.zone dt { font-family: var(--f-hud); font-size: 11px; text-transform: uppercase; color: var(--dim); }
+.zone dd { margin-bottom: 6px; }
+.zone.inv { background: var(--acc); color: var(--on-acc); border-left-color: transparent; }
+.zone.inv .hud, .zone.inv dt, .zone.inv p { color: var(--on-acc); opacity: .85; }
+
+/* listas */
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 860px) { .two { grid-template-columns: 1fr; } }
+.box { border: 1px solid var(--wire); padding: 22px 24px; }
+.box h3 { font-family: var(--f-display); font-variation-settings: "wdth" 112; font-weight: 750; font-size: 21px; margin-bottom: 12px; }
+.box ul { list-style: none; display: grid; gap: 10px; }
+.box li { padding-left: 18px; position: relative; }
+.box li::before { content: "■"; position: absolute; left: 0; top: 1px; font-size: 9px; color: var(--acc); }
+code { font-family: var(--f-hud); font-size: 13px; color: var(--code); }
+.qs { counter-reset: q; list-style: none; display: grid; gap: 1px; background: var(--wire); border: 1px solid var(--wire); }
+.qs li { background: var(--void); padding: 16px 20px 16px 62px; position: relative; }
+.qs li::before { counter-increment: q; content: "Q" counter(q); position: absolute; left: 20px; top: 16px; font-family: var(--f-hud); color: var(--acc); }
+.qs strong { display: block; }
+.qs span { color: var(--dim); font-size: 15px; }
+.qs li.new strong::after { content: " · novo"; font-family: var(--f-hud); font-size: 11px; color: var(--acc); text-transform: uppercase; }
+footer { padding: 44px 0 80px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .blink { animation: none; }
+  .room.zooming { transition: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="wrap">
+    <span class="hud hide-sm"><b>■</b> plano · v0.2</span>
+    <div class="xp" aria-hidden="true"><i id="xp"></i></div>
+    <div class="toggle" role="group" aria-label="Escolher paleta">
+      <button data-theme-set="neon" aria-pressed="true"><i style="background:#FF2E88"></i>B · neon</button>
+      <button data-theme-set="fosforo" aria-pressed="false"><i style="background:#00FF41"></i>A · fósforo</button>
+    </div>
+  </div>
+</div>
+
+<header class="cover">
+  <div class="wrap">
+    <span class="hud">gustavoh.dev · plano visual · revisão 2</span>
+    <h1>Uma ficha, um arcade, <em>uma fase</em> pra direita.</h1>
+    <p style="max-width:60ch; font-size:18px">A página abre num salão de fliperama. A pessoa clica em entrar, a câmera mergulha na tela do gabinete e o portfólio vira uma fase de plataforma. Rolar a página faz o Gugabyte andar pra direita, e o conteúdo aparece conforme ele passa pelas placas. Use os botões lá em cima pra ver a página inteira em verde ou em rosa.</p>
+    <div class="changes">
+      <div><span class="hud">navegação</span><s>scroll vertical com cenas fixadas</s><br>Fase horizontal. O scroll move o personagem.</div>
+      <div><span class="hud">entrada</span><s>boot de texto no HUD</s><br>Salão de arcade + zoom pra dentro da tela.</div>
+      <div><span class="hud">cor</span><s>void violeta + amarelo</s><br>Preto + verde fósforo <em>ou</em> preto + rosa neon.</div>
+    </div>
+  </div>
+</header>
+
+<!-- DEMO -->
+<section class="doc" id="demo" data-lvl="demo">
+  <div class="wrap">
+    <div class="sh"><h2>Protótipo: entrada + fase</h2><p>Clique em “Entrar”. Depois role com o mouse sobre a cena, use ← → ou arraste. É um rascunho de movimento, não o visual final.</p></div>
+
+    <div class="stage" id="stage" tabindex="0" aria-label="Protótipo da entrada em arcade e da fase horizontal">
+      <div class="room" id="room">
+        <div class="wall"></div>
+        <div class="floor"></div>
+
+        <div class="cab ghost" style="left:43cqw"><div class="marquee"><span>.</span></div><div class="bezel"><div class="screen"></div></div><div class="panel"></div><div class="body"></div></div>
+        <div class="cab ghost" style="left:90cqw"><div class="marquee"><span>.</span></div><div class="bezel"><div class="screen"></div></div><div class="panel"></div><div class="body"></div></div>
+
+        <div class="cab" id="cab">
+          <div class="marquee"><span>GUSTAVO H.</span></div>
+          <div class="bezel">
+            <div class="screen" id="screen">
+              <svg class="spr" data-frame="idle" viewBox="0 0 16 16" shape-rendering="crispEdges" style="width:5cqw;height:5cqw"></svg>
+              <span class="ins blink">insert coin</span>
+            </div>
+          </div>
+          <div class="panel"><span class="stick"></span><span class="btns"><i></i><i></i><i></i></span></div>
+          <div class="body"><div class="coin"><i></i><i></i></div></div>
+        </div>
+
+        <div class="title" id="title">
+          <span class="hud">gustavoh.dev · arcade</span>
+          <h3>Portfólio de um designer que <em>programa</em>.</h3>
+          <button class="enter" id="enter">Entrar ▶</button>
+          <span class="hud credit">créditos: <b>01</b> · <span class="blink">press start</span></span>
+        </div>
+      </div>
+
+      <div class="level" id="level" aria-hidden="true">
+        <svg class="sky" id="sky" preserveAspectRatio="none"></svg>
+        <div class="world" id="world"></div>
+        <div class="hero" id="hero"><svg viewBox="0 0 16 16" shape-rendering="crispEdges"></svg></div>
+        <div class="lhud"><strong>GH</strong><span class="bar"><i id="lxp"></i></span><span id="lzone">start</span></div>
+        <div class="ldlg" id="ldlg">&gt;</div>
+        <span class="hint">role ▸ ou use ← →</span>
+        <div class="ctrl"><button id="bl" aria-label="Andar pra esquerda">◀</button><button id="br" aria-label="Andar pra direita">▶</button></div>
+      </div>
+
+      <div class="crt" id="crt"></div>
+    </div>
+    <div class="demo-foot">
+      <span class="hud">no site real a cena ocupa a tela inteira; no celular, arrastar ou rolar também anda</span>
+      <button class="ghost-btn" id="replay">↺ rever a entrada</button>
+    </div>
+
+    <div class="seq">
+      <div><span class="hud">1 · salão</span><strong>Tela de entrada</strong><p>Gabinete aceso no meio de outros apagados. Na tela dele, o Gugabyte em “insert coin”. Título curto e um botão.</p></div>
+      <div><span class="hud">2 · ficha</span><strong>Clique em entrar</strong><p>A fenda da ficha pisca e o título some. Som de ficha opcional (desligado por padrão).</p></div>
+      <div><span class="hud">3 · mergulho</span><strong>Zoom na tela</strong><p>A câmera voa até a tela do gabinete em ~1,2s, com uma curva de aceleração forte no meio.</p></div>
+      <div><span class="hud">4 · CRT liga</span><strong>A fase começa</strong><p>Uma linha de CRT se abre e revela a fase. Quem volta ao site pula direto pra cá, sem repetir a intro.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- CORES -->
+<section class="doc" id="cores" data-lvl="cores">
+  <div class="wrap">
+    <div class="sh"><h2>As duas paletas</h2><p>Mesma estrutura nas duas: fundo quase preto tingido pela cor principal, uma cor de destaque e uma segunda cor só pra trechos de código.</p></div>
+    <div class="palettes">
+      <div class="pal">
+        <span class="hud">opção A</span>
+        <h3>Fósforo</h3>
+        <p>O verde do Matrix e dos monitores de fósforo. Lê na hora como “código”, mas é o caminho mais visto em portfólio dev.</p>
+        <div class="chips">
+          <div style="background:#050A07;color:#7F9787">void<br>#050A07</div>
+          <div style="background:#0B140F;color:#7F9787">carbon<br>#0B140F</div>
+          <div style="background:#18291F;color:#7F9787">wire<br>#18291F</div>
+          <div style="background:#E2F2E6;color:#050A07">texto<br>#E2F2E6</div>
+          <div style="background:#00FF41;color:#050A07">fósforo<br>#00FF41</div>
+          <div style="background:#FF2E88;color:#050A07">código<br>#FF2E88</div>
+        </div>
+        <div class="pal-demo" style="background:#050A07;border:1px solid #18291F">
+          <span class="t" style="color:#E2F2E6">LV.3 <span style="color:#00FF41">loot</span></span>
+          <span class="c" style="color:#FF2E88">&lt;Card rarity="epic" /&gt;</span>
+          <span class="b" style="background:#00FF41;color:#050A07">entrar ▶</span>
+        </div>
+      </div>
+      <div class="pal rec">
+        <span class="hud">opção B</span>
+        <h3>Neon arcade</h3>
+        <p>O rosa de letreiro de fliperama. É mais arcade e menos “hacker”, então a cara de vibe coding fica sutil, como você pediu. O verde Matrix continua, só que reservado pro código.</p>
+        <div class="chips">
+          <div style="background:#0B0710;color:#9A8AA3">void<br>#0B0710</div>
+          <div style="background:#150E1A;color:#9A8AA3">carbon<br>#150E1A</div>
+          <div style="background:#2A1C33;color:#9A8AA3">wire<br>#2A1C33</div>
+          <div style="background:#F2E6EE;color:#0B0710">texto<br>#F2E6EE</div>
+          <div style="background:#FF2E88;color:#0B0710">neon<br>#FF2E88</div>
+          <div style="background:#00FF41;color:#0B0710">código<br>#00FF41</div>
+        </div>
+        <div class="pal-demo" style="background:#0B0710;border:1px solid #2A1C33">
+          <span class="t" style="color:#F2E6EE">LV.3 <span style="color:#FF2E88">loot</span></span>
+          <span class="c" style="color:#00FF41">&lt;Card rarity="epic" /&gt;</span>
+          <span class="b" style="background:#FF2E88;color:#0B0710">entrar ▶</span>
+        </div>
+      </div>
+    </div>
+    <p class="hud" style="margin-top:16px">nas duas opções, uma única zona da fase (a ficha do personagem) inverte pra fundo na cor de destaque · tipografia continua a mesma: archivo expanded / host grotesk / departure mono</p>
+  </div>
+</section>
+
+<!-- MAPA -->
+<section class="doc" id="mapa" data-lvl="mapa">
+  <div class="wrap">
+    <div class="sh"><h2>Mapa da fase</h2><p>Seis zonas da esquerda pra direita. Em cada placa o Gugabyte comenta e o conteúdo da zona aparece. Arraste o mapa pro lado.</p></div>
+  </div>
+  <div class="wrap">
+    <div class="map-scroll">
+      <div class="map">
+        <div class="zone"><span class="hud">zona 0 · start</span><strong>“Eu parei de entregar mockup.”</strong><p>Primeira coisa depois da tela do arcade: o título grande e o mascote parado na largada.</p><dl><dt>interação</dt><dd>Dica “role pra andar” piscando até o primeiro movimento.</dd></dl></div>
+        <div class="zone"><span class="hud">zona 1 · origem</span><strong>O designer</strong><p>Um frame de design no cenário vira bloco de código conforme o personagem passa por ele.</p><dl><dt>mascote</dt><dd>Pega a caneta bézier e troca pelo terminal.</dd></dl></div>
+        <div class="zone"><span class="hud">zona 2 · método</span><strong>Ideia → Prompt → Iteração → Deploy</strong><p>Quatro plataformas em escada. O mascote sobe uma por etapa, e cada uma abre um exemplo real.</p><dl><dt>componente</dt><dd>Stepper (Origin UI), restilizado.</dd></dl></div>
+        <div class="zone"><span class="hud">zona 3 · projetos</span><strong>Corredor de gabinetes</strong><p>Cada projeto é um mini-arcade no cenário. O personagem passa, a tela acende e mostra o projeto. Clique abre o detalhe com link ao vivo.</p><dl><dt>componente</dt><dd>Card com tilt/spotlight (21st.dev) no painel de detalhe.</dd></dl></div>
+        <div class="zone inv"><span class="hud">zona 4 · ficha</span><strong>Ficha do personagem</strong><p>A única área com fundo na cor de destaque. Equipamentos (Figma, Claude Code, React…) e barras de atributo.</p><dl><dt>por quê</dt><dd>Quebra o ritmo escuro no meio da fase.</dd></dl></div>
+        <div class="zone"><span class="hud">zona 5 · continue?</span><strong>Contato</strong><p>Tela de “continue?” com contagem regressiva. Os botões são os canais de contato. No zero: “game over… brincadeira”.</p><dl><dt>componente</dt><dd>Botões e input de e-mail (Origin UI).</dd></dl></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TECH -->
+<section class="doc" id="tech" data-lvl="tech">
+  <div class="wrap">
+    <div class="sh"><h2>Como isso vira código</h2></div>
+    <div class="two">
+      <div class="box">
+        <h3>Movimento</h3>
+        <ul>
+          <li>A página tem altura “falsa” e o scroll vertical é convertido em deslocamento horizontal (GSAP ScrollTrigger). Assim roda do mouse, trackpad, barra de rolagem e teclado funcionam sem truque.</li>
+          <li>Câmera segue o personagem com leve atraso. O céu e a cidade andam mais devagar (parallax em 3 camadas).</li>
+          <li>Personagem anda enquanto há movimento, para quando o scroll para e vira de lado quando a pessoa volta.</li>
+          <li>Entrada em CSS 3D + Motion: abre instantâneo, sem carregar modelo 3D.</li>
+          <li>Reduced-motion: a intro vira um fade e a fase vira trilha com cortes secos.</li>
+        </ul>
+      </div>
+      <div class="box">
+        <h3>Base</h3>
+        <ul>
+          <li>Vite + React + TypeScript.</li>
+          <li>Tailwind v4 + shadcn/ui pra receber componentes do 21st.dev e do Origin UI com <code>npx shadcn add &lt;url&gt;</code>.</li>
+          <li>A paleta escolhida vira tokens CSS, então qualquer componente instalado já nasce rosa ou verde.</li>
+          <li>Zonas e projetos descritos num arquivo de dados: adicionar um projeto = mais um gabinete no corredor.</li>
+          <li>Deploy na Vercel.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PERGUNTAS -->
+<section class="doc" id="q" data-lvl="perguntas">
+  <div class="wrap">
+    <div class="sh"><h2>O que preciso de você</h2></div>
+    <ol class="qs">
+      <li class="new"><strong>Paleta</strong><span>A (fósforo verde) ou B (neon rosa)? Eu recomendo a B, pelo motivo lá em cima.</span></li>
+      <li class="new"><strong>Som</strong><span>Vale ter som 8-bit (ficha, passos, “continue?”) com botão de mudo, ou o site fica em silêncio?</span></li>
+      <li><strong>Nome do mascote</strong><span>“Gugabyte” ou outro nome?</span></li>
+      <li><strong>Idioma</strong><span>Português, inglês ou os dois?</span></li>
+      <li><strong>Projetos</strong><span>gri.d.maker, bento maker, gradient maker, logo sizer e Mask Studio? Preciso dos links e prints.</span></li>
+      <li><strong>“OriginKit”</strong><span>É o Origin UI (originui.com)?</span></li>
+      <li><strong>Contato</strong><span>Quais canais: e-mail, LinkedIn, GitHub, Behance, Instagram?</span></li>
+    </ol>
+  </div>
+</section>
+
+<footer><div class="wrap"><span class="hud">fim do plano v0.2 · aprovado isto, o próximo passo é criar o projeto e construir a entrada do arcade + a fase vazia andando</span></div></footer>
+
+<script>
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------- tema ---------- */
+document.querySelectorAll("[data-theme-set]").forEach(b => b.addEventListener("click", () => {
+  document.documentElement.dataset.theme = b.dataset.themeSet;
+  document.querySelectorAll("[data-theme-set]").forEach(x => x.setAttribute("aria-pressed", x === b));
+}));
+
+/* ---------- Gugabyte (cores ligadas aos tokens) ---------- */
+const FILL = { A:"var(--acc)", D:"var(--dim)", B:"var(--text)", K:"var(--dim)", S:"var(--carbon)", E:"var(--acc)", V:"var(--acc-dim)" };
+const head = [".......A........", ".......D........", "...BBBBBBBBBB...", "..BBBBBBBBBBBB..", "..BSSSSSSSSSSB..", "..BSSSSSSSSSSB.."];
+const face = {
+  idle:  ["SSESSSSESS","SSESSSSESS","SSSSSSSSSS","SSSSSSSSSS"],
+  blink: ["SSSSSSSSSS","SSESSSSESS","SSSSSSSSSS","SSSSSSSSSS"],
+  happy: ["SSESSSSESS","SESESSESES","SSSSSSSSSS","SSSSEESSSS"],
+};
+const neck = ["..BBBBBBBBBBBB..", "...KKKKKKKKKK...", "...VBBBBBBBBV...", "...V.BBBBBB.V..."];
+const legsA = [".....BB..BB.....", ".....KK..KK....."];
+const legsB = ["....BB....BB....", "....KK....KK...."];
+/* perfil (olhando pra direita): lateral do gabinete à esquerda, olhos puxados pra frente */
+const sideHead = [...head.slice(0, 4), ...["KBSSSSSSSS","KBSSSSSSSS","KBSSSSESSE","KBSSSSESSE","KBSSSSSSSS","KBSSSSSSSS"].map(r => "..B" + r + "B.."), "..BBBBBBBBBBBB..", "...KKKKKKKKKK..."];
+const walkCycle = [
+  ["....BBBBBBBB....", "....BBBBBBBBV...", ".....BB...BB....", ".....KKK..KKK..."], // passo, braço na frente
+  ["....BBBBBBBB....", "....BBBBBBBB....", "......BBB.......", "......KKKK......"], // pernas juntas
+  ["....BBBBBBBB....", "...VBBBBBBBB....", ".....BB...BB....", ".....KKK..KKK..."], // passo, braço atrás
+  ["....BBBBBBBB....", "....BBBBBBBB....", "......BBB.......", "......KKKK......"],
+];
+function draw(svg, name, step = 0) {
+  const rows = name === "walk"
+    ? [...sideHead, ...walkCycle[step % 4]]
+    : [...head, ...face[name].map(r => "..B" + r + "B.."), ...neck, ...legsA];
+  let out = "";
+  rows.forEach((r, y) => [...r].forEach((c, x) => { if (c !== ".") out += `<rect x="${x}" y="${y}" width="1.02" height="1.02" style="fill:${FILL[c]}"/>`; }));
+  svg.innerHTML = out;
+}
+document.querySelectorAll("svg[data-frame]").forEach(s => draw(s, s.dataset.frame));
+
+/* ---------- mundo da fase ---------- */
+const zones = [
+  { x: .045, name: "start",       say: "> oi, eu sou o gugabyte. role pra andar." },
+  { x: .19,  name: "1 · origem",  say: "> o gustavo começou desenhando telas pros outros programarem." },
+  { x: .35,  name: "2 · método",  say: "> o jeito dele: ideia, prompt, iteração, deploy." },
+  { x: .51,  name: "3 · projetos",say: "> loot! cada gabinete aqui é uma ferramenta no ar." },
+  { x: .67,  name: "4 · ficha",   say: "> ficha do personagem. equipamentos e atributos." },
+  { x: .82,  name: "5 · continue?",say: "> continue? bora fazer o próximo juntos." },
+];
+const world = document.getElementById("world");
+const W = p => (p * 100) + "%";
+let html = `<div class="band" style="left:${W(.655)};width:${W(.12)}"></div>`;
+zones.forEach(z => html += `<div class="post" style="left:${W(z.x)}"><span class="sign">${z.name}</span><span class="pole"></span></div>`);
+html += `<div class="prop" style="left:${W(.06)};bottom:22cqw;font-family:var(--f-display);font-variation-settings:'wdth' 125;font-weight:900;font-size:5.4cqw;line-height:.95;color:var(--text);text-transform:none;letter-spacing:-.02em">Eu parei de<br>entregar <span style="color:var(--acc)">mockup.</span></div>`;
+html += `<div class="prop frame-box" style="left:${W(.205)};bottom:20cqw;width:12cqw;height:14cqw">frame</div>
+         <div class="prop" style="left:${W(.235)};bottom:26cqw;color:var(--acc);font-size:2cqw">→</div>
+         <div class="prop code-box" style="left:${W(.245)};bottom:20cqw;width:15cqw">&lt;Hero&gt;<br>&nbsp;&lt;Title /&gt;<br>&nbsp;&lt;Cta /&gt;<br>&lt;/Hero&gt;</div>`;
+["ideia","prompt","iteração","deploy"].forEach((s, i) =>
+  html += `<div class="step" style="left:${W(.365 + i * .028)};height:${4 + i * 3.5}cqw">${s}</div>`);
+["gri.d<br>maker","bento<br>maker","gradient<br>maker","logo<br>sizer","mask<br>studio"].forEach((p, i) =>
+  html += `<div class="loot" style="left:${W(.525 + i * .024)}"><div class="scr">${p}</div><div class="base"></div></div>`);
+html += `<div class="prop" style="left:${W(.685)};bottom:22cqw">
+  <div style="font-family:var(--f-display);font-variation-settings:'wdth' 125;font-weight:900;font-size:3.6cqw;color:var(--on-acc);margin-bottom:1.6cqw;text-transform:none">Ficha</div>
+  ${[["design",14],["prompt",12],["front",9],["motion",10]].map(([k,v]) => `<div class="stat"><span>${k}</span><i style="width:${v}cqw"></i></div>`).join("")}</div>`;
+html += `<div class="cont" style="left:${W(.83)}"><b>Continue?</b><span id="cd">9</span></div>`;
+html += `<div class="ground"></div>`;
+world.innerHTML = html;
+
+/* cidade ao fundo (pseudo-aleatório fixo) */
+const sky = document.getElementById("sky");
+let seed = 7; const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+let s = "", x = 0;
+sky.setAttribute("viewBox", "0 0 1000 100");
+while (x < 1000) {
+  const w = 14 + rnd() * 30, h = 18 + rnd() * 46;
+  s += `<rect x="${x}" y="${100 - h - 21}" width="${w}" height="${h}" style="fill:var(--carbon)"/>`;
+  for (let i = 0; i < 4; i++) if (rnd() > .45) s += `<rect x="${x + 3 + rnd() * (w - 6)}" y="${100 - h - 18 + rnd() * (h - 8)}" width="1.6" height="1.6" style="fill:var(--acc);opacity:.55"/>`;
+  x += w + 2 + rnd() * 8;
+}
+sky.innerHTML = s;
+
+/* ---------- controle da fase ---------- */
+const stage = document.getElementById("stage");
+const level = document.getElementById("level");
+const hero = document.getElementById("hero");
+const heroSvg = hero.querySelector("svg");
+const dlg = document.getElementById("ldlg");
+const lzone = document.getElementById("lzone");
+const lxp = document.getElementById("lxp");
+let target = 0, cur = 0, active = false, step = 0, lastMove = 0, lastStep = 0, pose = "idle", zoneIdx = -1, typing;
+
+function say(str) {
+  clearTimeout(typing);
+  if (reduce) { dlg.textContent = str; return; }
+  let i = 0;
+  (function tick() { dlg.textContent = str.slice(0, ++i); if (i < str.length) typing = setTimeout(tick, 26); })();
+}
+function nudge(d) { target = Math.min(1, Math.max(0, target + d)); }
+stage.addEventListener("wheel", e => {
+  if (!active) return;
+  e.preventDefault();
+  nudge((e.deltaY + e.deltaX) / 4000);
+}, { passive: false });
+stage.addEventListener("keydown", e => {
+  if (!active) return;
+  if (e.key === "ArrowRight") { nudge(.03); e.preventDefault(); }
+  if (e.key === "ArrowLeft") { nudge(-.03); e.preventDefault(); }
+});
+let dragX = null;
+stage.addEventListener("pointerdown", e => { if (active && !e.target.closest("button")) dragX = e.clientX; });
+addEventListener("pointermove", e => { if (dragX !== null) { nudge((dragX - e.clientX) / stage.clientWidth / 3); dragX = e.clientX; } });
+addEventListener("pointerup", () => dragX = null);
+let hold;
+[["bl", -.012], ["br", .012]].forEach(([id, d]) => {
+  const b = document.getElementById(id);
+  b.addEventListener("pointerdown", () => { nudge(d); hold = setInterval(() => nudge(d), 40); });
+  ["pointerup", "pointerleave"].forEach(ev => b.addEventListener(ev, () => clearInterval(hold)));
+});
+
+function loop(t) {
+  const prev = cur;
+  cur += (target - cur) * (reduce ? 1 : .12);
+  const sw = stage.clientWidth, ww = sw * 5;
+  const cam = cur * (ww - sw);
+  world.style.transform = `translateX(${-cam}px)`;
+  sky.style.transform = `translateX(${-cam * .18}px)`;
+  lxp.style.width = (cur * 100) + "%";
+  const moving = Math.abs(cur - prev) > .00005;
+  if (moving) {
+    // andando: vira de perfil na direção do movimento
+    hero.classList.toggle("left", cur < prev);
+    if (pose !== "walk" || t - lastStep > 110) { step++; lastStep = t; pose = "walk"; draw(heroSvg, "walk", step); }
+    lastMove = t;
+  } else if (pose === "walk" && t - lastMove > 180) {
+    // parou: vira pra pessoa
+    pose = "idle"; hero.classList.remove("left"); draw(heroSvg, "idle");
+  } else if (pose !== "walk" && !reduce) {
+    // parado: pisca de vez em quando
+    const blinkNow = (t - lastMove) % 3200 > 3050;
+    if (blinkNow !== (pose === "blink")) { pose = blinkNow ? "blink" : "idle"; draw(heroSvg, pose); }
+  }
+  const hx = (cam + sw * .22) / ww;
+  let zi = 0; zones.forEach((z, i) => { if (hx >= z.x - .01) zi = i; });
+  if (zi !== zoneIdx) { zoneIdx = zi; lzone.textContent = zones[zi].name; say(zones[zi].say); }
+  requestAnimationFrame(loop);
+}
+draw(heroSvg, "idle");
+requestAnimationFrame(loop);
+
+/* contagem do continue? */
+let cd = 9;
+setInterval(() => { if (active && zoneIdx === 5 && !reduce) { cd = cd > 0 ? cd - 1 : 9; document.getElementById("cd").textContent = cd; } }, 1000);
+
+/* ---------- entrada: zoom pra dentro do gabinete ---------- */
+const room = document.getElementById("room");
+const screenEl = document.getElementById("screen");
+const title = document.getElementById("title");
+const crt = document.getElementById("crt");
+
+function enter() {
+  title.style.opacity = 0;
+  room.classList.add("lit");
+  const sr = stage.getBoundingClientRect(), r = screenEl.getBoundingClientRect();
+  const cx = r.left - sr.left + r.width / 2, cy = r.top - sr.top + r.height / 2;
+  const s = Math.max(sr.width / r.width, sr.height / r.height) * 1.08;
+  const go = () => {
+    room.classList.add("zooming");
+    room.style.transform = `translate(${sr.width / 2 - s * cx}px, ${sr.height / 2 - s * cy}px) scale(${s})`;
+  };
+  const reveal = () => {
+    level.classList.add("show"); level.setAttribute("aria-hidden", "false");
+    crt.classList.remove("on"); void crt.offsetWidth; crt.classList.add("on");
+    active = true; zoneIdx = -1; stage.focus({ preventScroll: true });
+  };
+  if (reduce) { reveal(); return; }
+  setTimeout(go, 380);
+  setTimeout(reveal, 380 + 1150);
+}
+document.getElementById("enter").addEventListener("click", enter);
+screenEl.addEventListener("click", enter);
+
+document.getElementById("replay").addEventListener("click", () => {
+  active = false; target = cur = 0;
+  level.classList.remove("show"); level.setAttribute("aria-hidden", "true");
+  crt.classList.remove("on");
+  room.classList.remove("zooming", "lit");
+  room.style.transform = "";
+  title.style.opacity = 1;
+});
+
+/* ---------- XP da página ---------- */
+const xp = document.getElementById("xp");
+addEventListener("scroll", () => {
+  const max = document.documentElement.scrollHeight - innerHeight;
+  xp.style.width = (max > 0 ? scrollY / max * 100 : 0) + "%";
+}, { passive: true });
+</script>
+</body>
+</html>

@@ -1,0 +1,357 @@
+/* ============ Salão do arcade (tela de entrada) ============ */
+.arcade {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  overflow: hidden;
+  background: #000;
+  container-type: size;
+  /* unidade do gabinete: cresce com a tela sem estourar na altura */
+  --u: min(1cqw, 1.75cqh);
+}
+.arcade-room {
+  position: absolute;
+  inset: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+.arcade[data-phase="zoom"] .arcade-room {
+  transition: transform 1.2s cubic-bezier(0.75, 0, 0.2, 1);
+}
+
+.arcade-wall {
+  position: absolute;
+  inset: 0 0 22% 0;
+  background:
+    radial-gradient(38% 70% at 66% 58%, color-mix(in srgb, var(--acc) 13%, transparent), transparent 70%),
+    repeating-linear-gradient(90deg, transparent 0 calc(var(--u) * 4 - 1px), color-mix(in srgb, var(--wire) 60%, transparent) calc(var(--u) * 4 - 1px) calc(var(--u) * 4)),
+    var(--void);
+}
+.arcade-floor {
+  position: absolute;
+  inset: 78% 0 0 0;
+  border-top: 1px solid var(--wire);
+  background:
+    radial-gradient(28% 70% at 66% 0%, color-mix(in srgb, var(--acc) 20%, transparent), transparent 70%),
+    linear-gradient(var(--carbon), #000);
+}
+
+/* ---------- gabinete ---------- */
+.cab {
+  position: absolute;
+  bottom: 12cqh;
+  width: calc(var(--u) * 22);
+  transform: translateX(-50%);
+}
+.cab-main {
+  left: 66cqw;
+}
+.cab-ghost {
+  width: calc(var(--u) * 17);
+  bottom: 14cqh;
+  filter: brightness(0.3) saturate(0.4);
+}
+.cab-ghost-l {
+  left: 43cqw;
+}
+.cab-ghost-r {
+  left: 90cqw;
+}
+.cab-marquee {
+  height: calc(var(--u) * 5.2);
+  display: grid;
+  place-items: center;
+  background: var(--acc);
+  border: calc(var(--u) * 0.5) solid var(--carbon);
+  border-bottom: 0;
+}
+.cab-ghost .cab-marquee {
+  background: var(--acc-dim);
+}
+.cab-main .cab-marquee {
+  box-shadow: 0 0 calc(var(--u) * 4) color-mix(in srgb, var(--acc) 50%, transparent);
+}
+.cab-marquee span {
+  font-size: calc(var(--u) * 1.9);
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  color: var(--on-acc);
+}
+.cab-bezel {
+  padding: calc(var(--u) * 1.4) calc(var(--u) * 1.6) calc(var(--u) * 1.8);
+  background: var(--carbon);
+  border-inline: calc(var(--u) * 0.5) solid #000;
+}
+.cab-screen {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: calc(var(--u) * 0.8);
+  overflow: hidden;
+  background: #000;
+  border: calc(var(--u) * 0.35) solid #000;
+}
+.cab-main .cab-screen {
+  cursor: pointer;
+  box-shadow: inset 0 0 calc(var(--u) * 2.4) color-mix(in srgb, var(--acc) 35%, transparent);
+}
+.cab-screen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.06) 0 1px, transparent 1px 3px);
+}
+.cab-sprite {
+  width: calc(var(--u) * 5.5);
+  height: calc(var(--u) * 5.5);
+}
+.cab-insert {
+  font-size: calc(var(--u) * 1.05);
+  color: var(--acc);
+}
+.cab-panel {
+  position: relative;
+  height: calc(var(--u) * 4.2);
+  margin: 0 calc(var(--u) * -1.4);
+  background: var(--wire);
+  clip-path: polygon(5% 0, 95% 0, 100% 100%, 0 100%);
+}
+.cab-stick {
+  position: absolute;
+  left: 22%;
+  top: calc(var(--u) * 0.7);
+  width: calc(var(--u) * 1.5);
+  height: calc(var(--u) * 1.5);
+  border-radius: 50%;
+  background: var(--acc);
+  box-shadow: 0 calc(var(--u) * 1.2) 0 calc(var(--u) * -0.45) #000;
+}
+.cab-btns {
+  position: absolute;
+  right: 18%;
+  top: calc(var(--u) * 1.3);
+  display: flex;
+  gap: calc(var(--u) * 0.7);
+}
+.cab-btns i {
+  width: calc(var(--u) * 1.2);
+  height: calc(var(--u) * 1.2);
+  border-radius: 50%;
+  background: var(--text);
+  opacity: 0.85;
+}
+.cab-btns i:first-child {
+  background: var(--acc);
+  opacity: 1;
+}
+.cab-body {
+  position: relative;
+  height: calc(var(--u) * 15);
+  display: grid;
+  place-items: center;
+  background: var(--carbon);
+  border-inline: calc(var(--u) * 0.5) solid #000;
+}
+.cab-body::before {
+  content: "";
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: calc(var(--u) * 1.2);
+  height: calc(var(--u) * 0.3);
+  background: var(--acc-dim);
+}
+.cab-coin {
+  width: calc(var(--u) * 5);
+  height: calc(var(--u) * 6);
+  display: flex;
+  justify-content: center;
+  gap: calc(var(--u) * 0.9);
+  padding-top: calc(var(--u) * 1.4);
+  background: #000;
+  border: calc(var(--u) * 0.25) solid var(--wire);
+}
+.cab-coin i {
+  width: calc(var(--u) * 0.5);
+  height: calc(var(--u) * 1.6);
+  background: var(--acc);
+  box-shadow: 0 0 calc(var(--u) * 1) var(--acc);
+}
+.arcade:not([data-phase="idle"]) .cab-coin i {
+  animation: coin-flash 0.12s steps(1) 3;
+}
+@keyframes coin-flash {
+  50% {
+    background: var(--text);
+  }
+}
+
+/* ---------- título e botão ---------- */
+.arcade-title {
+  position: absolute;
+  left: 7cqw;
+  top: 50%;
+  width: min(42cqw, 600px);
+  transform: translateY(-58%);
+  transition: opacity 0.3s;
+}
+.arcade-eyebrow {
+  font-size: 13px;
+  color: var(--dim);
+}
+.arcade-h1 {
+  margin: 18px 0 32px;
+  font-size: clamp(34px, 4.8cqw, 80px);
+  line-height: 0.95;
+}
+.arcade-h1 em,
+.z-start-title em {
+  font-style: normal;
+  color: var(--acc);
+}
+.arcade-enter {
+  padding: 16px 30px;
+  font-size: 18px;
+  background: var(--acc);
+  color: var(--on-acc);
+  border: 0;
+  cursor: pointer;
+  box-shadow:
+    0 0 0 4px var(--void),
+    0 0 0 6px var(--acc),
+    0 0 40px color-mix(in srgb, var(--acc) 40%, transparent);
+  transition: transform 0.12s, filter 0.12s;
+}
+.arcade-enter:hover {
+  filter: brightness(1.1);
+  transform: translateY(-2px);
+}
+.arcade-enter:active {
+  transform: translateY(1px);
+}
+.arcade-enter:focus-visible {
+  outline-offset: 10px;
+}
+.arcade-credit {
+  display: block;
+  margin-top: 26px;
+  font-size: 12px;
+  color: var(--dim);
+}
+.arcade-credit b {
+  font-weight: 400;
+  color: var(--acc);
+}
+.arcade-toggles {
+  position: absolute;
+  top: 18px;
+  right: clamp(16px, 2.4vw, 32px);
+  transition: opacity 0.3s;
+}
+.arcade:not([data-phase="idle"]) .arcade-title,
+.arcade:not([data-phase="idle"]) .arcade-toggles {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* retrato / celular: título em cima, gabinete embaixo */
+@container (max-aspect-ratio: 1 / 1) {
+  .arcade-room {
+    --u: min(2.6cqw, 1.45cqh);
+  }
+  .cab-main {
+    left: 50cqw;
+    bottom: 8cqh;
+  }
+  .cab-ghost {
+    bottom: 10cqh;
+  }
+  .cab-ghost-l {
+    left: 6cqw;
+  }
+  .cab-ghost-r {
+    left: 94cqw;
+  }
+  .arcade-title {
+    left: 6cqw;
+    right: 6cqw;
+    top: 72px;
+    width: auto;
+    transform: none;
+    text-align: center;
+  }
+  .arcade-h1 {
+    margin: 12px 0 22px;
+    font-size: clamp(30px, 8.4cqw, 54px);
+  }
+  .arcade-credit {
+    margin-top: 18px;
+  }
+  .arcade-wall {
+    background:
+      radial-gradient(60% 50% at 50% 70%, color-mix(in srgb, var(--acc) 13%, transparent), transparent 70%),
+      repeating-linear-gradient(90deg, transparent 0 calc(var(--u) * 4 - 1px), color-mix(in srgb, var(--wire) 60%, transparent) calc(var(--u) * 4 - 1px) calc(var(--u) * 4)),
+      var(--void);
+  }
+}
+
+/* ---------- CRT ligando (depois do zoom) ---------- */
+.crt-on {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  background: #000;
+  animation: crt-bg 0.7s steps(1) forwards;
+}
+.crt-on::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--text);
+  transform: scale(0, 0.004);
+  animation: crt-line 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+@keyframes crt-bg {
+  0% {
+    opacity: 1;
+  }
+  45% {
+    background: transparent;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+@keyframes crt-line {
+  0% {
+    transform: scale(0, 0.004);
+    opacity: 1;
+  }
+  35% {
+    transform: scale(1, 0.004);
+    opacity: 1;
+  }
+  65% {
+    transform: scale(1, 1);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1, 1);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arcade[data-phase="zoom"] .arcade-room {
+    transition: none;
+  }
+  .crt-on,
+  .crt-on::before {
+    animation-duration: 0.01s;
+  }
+}

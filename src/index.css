@@ -1,0 +1,156 @@
+@import "tailwindcss";
+@import "@fontsource-variable/archivo/wdth.css";
+@import "@fontsource-variable/host-grotesk";
+
+@font-face {
+  font-family: "Departure Mono";
+  src: url("./assets/fonts/DepartureMono-Regular.woff2") format("woff2");
+  font-display: swap;
+}
+
+@custom-variant dark (&:is(.dark *));
+
+/* Paleta A — Fósforo */
+:root {
+  --void: #050a07;
+  --carbon: #0b140f;
+  --wire: #18291f;
+  --text: #e2f2e6;
+  --dim: #7f9787;
+  --acc: #00ff41;
+  --acc-dim: #0b6b2e;
+  --code: #ff2e88;
+  --on-acc: #050a07;
+
+  /* tokens shadcn: componentes externos (21st.dev / Origin Kit) herdam a paleta */
+  --radius: 0.125rem;
+  --background: var(--void);
+  --foreground: var(--text);
+  --card: var(--carbon);
+  --card-foreground: var(--text);
+  --popover: var(--carbon);
+  --popover-foreground: var(--text);
+  --primary: var(--acc);
+  --primary-foreground: var(--on-acc);
+  --secondary: var(--wire);
+  --secondary-foreground: var(--text);
+  --muted: var(--carbon);
+  --muted-foreground: var(--dim);
+  --accent: var(--wire);
+  --accent-foreground: var(--text);
+  --destructive: var(--code);
+  --border: var(--wire);
+  --input: var(--wire);
+  --ring: var(--acc);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-void: var(--void);
+  --color-carbon: var(--carbon);
+  --color-wire: var(--wire);
+  --color-text: var(--text);
+  --color-dim: var(--dim);
+  --color-acc: var(--acc);
+  --color-acc-dim: var(--acc-dim);
+  --color-code: var(--code);
+
+  --radius-sm: calc(var(--radius) - 1px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --font-display: "Archivo Variable", system-ui, sans-serif;
+  --font-sans: "Host Grotesk Variable", system-ui, sans-serif;
+  --font-mono: "Departure Mono", ui-monospace, monospace;
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  html {
+    background: var(--void);
+    color-scheme: dark;
+  }
+  body {
+    background: var(--void);
+    color: var(--text);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior: none;
+  }
+  ::selection {
+    background: var(--acc);
+    color: var(--on-acc);
+  }
+  :focus-visible {
+    outline: 2px solid var(--acc);
+    outline-offset: 3px;
+  }
+}
+
+/* Lenis */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis:not(.lenis-autoToggle).lenis-stopped {
+  overflow: clip;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+/* utilitários de voz */
+.hud {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.display {
+  font-family: var(--font-display);
+  font-stretch: 125%;
+  font-weight: 850;
+  letter-spacing: -0.025em;
+}
+.blink {
+  animation: blink 1s steps(1) infinite;
+}
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blink {
+    animation: none;
+  }
+}
